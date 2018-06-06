@@ -1,7 +1,9 @@
 import { Model } from '../model';
+import { ColumnType } from '../types';
 
 export interface ColumnOptions {
 
-	collection: Model;
+	type: ColumnType;
+	collection?: Model;
 
 }

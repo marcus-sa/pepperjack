@@ -1,25 +1,25 @@
 import 'reflect-metadata';
 import { expect } from 'chai';
 
-import { COLLECTION_NAME_METADATA } from '../metadata';
-import { Collection } from './collection.decorator';
+import { COLLECTION_NAME_METADATA } from '../../src/metadata';
+import { Collection } from '../../src/decorators/collection.decorator';
 
 describe('@Collection', () => {
 	const name = 'test-collection';
 
-	it('should define metadata name', () => {
+	it('should enhance class with expected metadata', () => {
 		@Collection({ name })
-		class Users {}
+		class Test {}
 
-		const collectionName = Reflect.getMetadata(COLLECTION_NAME_METADATA, Users);
+		const collectionName = Reflect.getMetadata(COLLECTION_NAME_METADATA, Test);
 		expect(collectionName).to.equal(name);
 	});
 
-	it('should refuse wrong metadata property', () => {
+	/*it('should refuse enhancing class with wrong metadata', () => {
 		expect(function () {
 			@Collection({ name, hello: 'world' } as any)
 			class Users {}
 		}).to.throw(Error, "Invalid property 'hello' in @Collection() decorator");
-	});
+	});*/
 
 });

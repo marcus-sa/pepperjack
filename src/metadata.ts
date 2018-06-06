@@ -1,1 +1,1 @@
-const COLLECTION_NAME_METADATA = '@collection/name';
+export const COLLECTION_NAME_METADATA = '@collection/name';
