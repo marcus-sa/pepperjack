@@ -1,0 +1,1 @@
+const COLLECTION_NAME_METADATA = '@collection/name';
