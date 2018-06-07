@@ -1,47 +1,71 @@
-import 'reflect-metadata';
-import iterare from 'iterare';
 import { expect } from 'chai';
 
+import { MetadataStorage } from '../../src/metadata/metadata-storage';
+import { MODES } from '../../src/metadata/metadata';
 import { Column } from '../../src';
-import { MetadataStorage } from '../../src/metadata-storage';
-import { MODES } from '../../src/metadata';
 
 describe('@Column', () => {
   beforeEach(() => {
-    // Clear column storage on each test
+    // Clear column storage before each test
     MetadataStorage.columns.clear();
   });
 
-  /*it('test', () => {
+  it('should guess type by design:type', () => {
     class Test {
       @Column()
       public _id: string;
     }
 
-    const column = iterare(MetadataStorage.columns).toArray()[0];
-
-    expect(column.options.type).to.equal(String);
-  });*/
-
-  it('should guess property design:type', () => {
-    class Test {
-      @Column()
-      public _id: string;
-    }
-
-    const columns = iterare(MetadataStorage.columns).toArray();
+    const columns = Array.from(MetadataStorage.columns);
     expect(columns[0].options.type).to.equal(String);
   });
 
-  it('should set column type with first argument', () => {
+  it('should set type by first argument', () => {
     class Test {
       @Column('string')
       public _id: string;
     }
 
-    const columns = iterare(MetadataStorage.columns).toArray();
+    const columns = Array.from(MetadataStorage.columns);
     expect(columns[0].options.type).to.equal('string');
-  })
+  });
+
+  it('should have correct propertyName', () => {
+    class Test {
+      @Column()
+      public _id: string;
+    }
+
+    const columns = Array.from(MetadataStorage.columns);
+    expect(columns[0].propertyName).to.equal('_id');
+  });
+
+  it('should have target be instance of entity', () => {
+    class Test {
+      @Column()
+      public _id: string;
+    }
+
+    const columns = Array.from(MetadataStorage.columns);
+    expect(columns[0].target).to.be.instanceOf(Test.constructor);
+  });
+
+  it('should have correct mode', () => {
+    class Test {
+      @Column()
+      public _id: string;
+    }
+
+    const columns = Array.from(MetadataStorage.columns);
+    expect(columns[0].mode).to.equal(MODES.REGULAR);
+  });
+
+  /*it('should have correct options', () => {
+    class Test {
+    @Column({ name: 'id' })
+
+    }
+  });*/
 
   /*it('should refuse enhancing class with wrong metadata', () => {
     expect(function () {
@@ -49,5 +73,4 @@ describe('@Column', () => {
       class Users {}
     }).to.throw(Error, "Invalid property 'hello' in @Collection() decorator");
   });*/
-
 });

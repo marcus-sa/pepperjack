@@ -1,4 +1,4 @@
-import { Metadata } from './types';
+import { ObjectType, Metadata } from './types';
 
 export function validateMetadata(metadata: Metadata, metadataKeys: string[], name?: string) {
 	Object.keys(metadata || {}).forEach(key => {
@@ -15,7 +15,15 @@ export function getMetadataByKeys(target: object, keys: string[]) {
 	}), {});
 }
 
-export function defineMetadata(target: object, metadata: Metadata) {
+export function getMetadata<T>(target: ObjectType<T>) {
+	return Reflect.getMetadataKeys(target)
+		.reduce<Metadata>((metadata, key) => ({
+			...metadata,
+			[key]: Reflect.getMetadata(key, target)
+		}), {})
+}
+
+export function defineMetadata<T>(target: ObjectType<T>, metadata: Metadata) {
 	Object.keys(metadata || {}).forEach(key => {
 		Reflect.defineMetadata(key, metadata[key], target);
 	})

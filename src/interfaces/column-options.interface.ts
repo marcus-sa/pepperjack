@@ -1,9 +1,9 @@
-import { Model } from '../model';
-import { ColumnType } from '../types';
+import { ColumnType, ObjectType } from '../types';
 
 export interface ColumnOptions {
 
-	type: ColumnType;
-	collection?: Model;
+  type: ColumnType;
+  collection?: ObjectType<any>;
+	name?: string;
 
 }

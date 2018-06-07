@@ -1,11 +1,11 @@
 import { ColumnOptions } from '../interfaces';
-import { ColumnType } from '../types';
-import { COLUMN_METADATA, COLLECTION_NAME_METADATA, MODES } from '../metadata';
-import { MetadataStorage } from '../metadata-storage';
+import { ObjectType, ColumnType } from '../types';
+import { MODES } from '../metadata/metadata';
+import { MetadataStorage } from '../metadata/metadata-storage';
 import { ColumnTypeUndefinedException } from '../exceptions';
 
 export function Column(typeOrOptions?: ColumnOptions | ColumnType, options?: ColumnOptions): PropertyDecorator {
-	return (target: object, propertyName: string) => {
+	return (target: ObjectType<any>, propertyName: string) => {
     // normalize parameters
 		let type: ColumnType | undefined;
 		if (typeof typeOrOptions === 'string') {
@@ -23,7 +23,6 @@ export function Column(typeOrOptions?: ColumnOptions | ColumnType, options?: Col
 
     // check if there is no type in column options then set type from first function argument, or guessed one
 		if (!options.type && type) options.type = type;
-
 		if (!options.type) throw new ColumnTypeUndefinedException(target, propertyName);
 
 		MetadataStorage.columns.add({
