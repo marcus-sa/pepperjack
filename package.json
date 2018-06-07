@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "ipfs": "^0.29.3",
+    "iterare": "^0.0.8",
     "reflect-metadata": "^0.1.12"
   },
   "nyc": {

@@ -10,7 +10,8 @@
     "experimentalDecorators": true,
     "module": "commonjs",
     "target": "es5",
-    "outDir": "dist"
+    "outDir": "dist",
+    "baseUrl": "."
   },
   "include": ["src"],
   "exclude": [

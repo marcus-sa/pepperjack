@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import { expect } from 'chai';
 
 import { COLLECTION_NAME_METADATA } from '../../src/metadata';
-import { Collection } from '../../src/decorators/collection.decorator';
+import { Collection } from '../../src';
 
 describe('@Collection', () => {
 	const name = 'test-collection';
