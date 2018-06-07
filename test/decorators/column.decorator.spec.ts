@@ -1,29 +1,47 @@
 import { expect } from 'chai';
 
-import { MetadataStorage } from '../../src/metadata/metadata-storage';
-import { MODES } from '../../src/metadata/metadata';
+import { MODES, MetadataStorage } from '../../src/metadata';
 import { Column } from '../../src';
 
 describe('@Column', () => {
   beforeEach(() => {
     // Clear column storage before each test
-    MetadataStorage.columns.clear();
+    MetadataStorage.empty();
   });
 
-  it('should guess type by design:type', () => {
-    class Test {
+  it('should guess native type by design:type', () => {
+    class User {
+
       @Column()
       public _id: string;
+
     }
 
     const columns = Array.from(MetadataStorage.columns);
     expect(columns[0].options.type).to.equal(String);
   });
 
+  // Unfortunately it doesn't work with array of class
+  it('should be able to define class as design:type', () => {
+    class Post {}
+
+    class User {
+
+      @Column()
+      public posts: Post
+
+    }
+
+    const columns = Array.from(MetadataStorage.columns);
+    expect(columns[0].options.type).to.deep.equal(Post);
+  });
+
   it('should set type by first argument', () => {
-    class Test {
+    class User {
+
       @Column('string')
       public _id: string;
+
     }
 
     const columns = Array.from(MetadataStorage.columns);
@@ -31,23 +49,27 @@ describe('@Column', () => {
   });
 
   it('should have correct propertyName', () => {
-    class Test {
+    class User {
+
       @Column()
       public _id: string;
+
     }
 
     const columns = Array.from(MetadataStorage.columns);
     expect(columns[0].propertyName).to.equal('_id');
   });
 
-  it('should have target be instance of entity', () => {
-    class Test {
+  it('should have target be constructor of collection', () => {
+    class User {
+
       @Column()
       public _id: string;
+
     }
 
     const columns = Array.from(MetadataStorage.columns);
-    expect(columns[0].target).to.be.instanceOf(Test.constructor);
+    expect(columns[0].target).to.be.instanceOf(User.constructor);
   });
 
   it('should have correct mode', () => {
@@ -60,17 +82,26 @@ describe('@Column', () => {
     expect(columns[0].mode).to.equal(MODES.REGULAR);
   });
 
-  /*it('should have correct options', () => {
-    class Test {
-    @Column({ name: 'id' })
+  it('should set embedded metadata', () => {
+    class Post {}
+
+    class User {
+
+      @Column(() => Post)
+      public posts: Post[];
 
     }
-  });*/
+  });
 
-  /*it('should refuse enhancing class with wrong metadata', () => {
-    expect(function () {
-      @Collection({ name, hello: 'world' } as any)
-      class Users {}
-    }).to.throw(Error, "Invalid property 'hello' in @Collection() decorator");
+  /*it('should set custom validator', () => {
+    const validator = (id: any) => typeof id === 'string';
+
+    class Test {
+      @Column(validator)
+      public _id: string;
+    }
+
+    const columns = Array.from(MetadataStorage.columns);
+    expect(columns[0].options.validator).to.deep.equal(validator);
   });*/
 });

@@ -1,8 +1,8 @@
 import paramCase = require('param-case');
 import { expect } from 'chai';
 
-import { COLLECTION_NAME_METADATA, COLLECTION_REPO_METADATA } from '../../src/metadata/metadata';
 import { Collection } from '../../src';
+import { COLLECTION_NAME_METADATA, COLLECTION_REPO_METADATA } from '../../src/metadata';
 
 describe('@Collection', () => {
 	const name = 'test-collection';

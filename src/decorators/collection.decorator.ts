@@ -2,23 +2,25 @@ import paramCase = require('param-case');
 
 import { CollectionOptions } from '../interfaces';
 import { defineMetadata } from '../utils';
-import { COLLECTION_NAME_METADATA, COLLECTION_REPO_METADATA } from '../metadata/metadata';
+import { COLLECTION_NAME_METADATA, COLLECTION_REPO_METADATA } from '../metadata';
 import { ObjectType } from '../types';
 
-/*export const collectionMetadataKeys = [
-	'name'
-];*/
-
-export function Collection<T>(metadata: CollectionOptions = {}): Function {
+/**
+ *
+ * @param {CollectionOptions} metadata
+ * @returns {ClassDecorator}
+ * @constructor
+ */
+export function Collection<T>(metadata: CollectionOptions = {}): ClassDecorator {
 	// Should it really validate?
 	// I mean people are forced to use TS
 	// so it would be really irrelevant
 	// validateMetadata(metadata, ['name'], Collection.name);
 
-	return (target: ObjectType<T | any>) => {
+	return (target: ObjectType<T>) => {
     if (!metadata.name) metadata.name = paramCase(target.name);
 
-		defineMetadata(target,{
+		defineMetadata(target, {
 		  [COLLECTION_REPO_METADATA]: metadata.repo,
 			[COLLECTION_NAME_METADATA]: metadata.name
 		});

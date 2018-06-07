@@ -1,6 +1,6 @@
 import { ObjectType, Metadata } from './types';
 
-export function validateMetadata(metadata: Metadata, metadataKeys: string[], name?: string) {
+/*export function validateMetadata(metadata: Metadata, metadataKeys: string[], name?: string) {
 	Object.keys(metadata || {}).forEach(key => {
 		if (metadataKeys.includes(key)) return;
 
@@ -21,8 +21,13 @@ export function getMetadata<T>(target: ObjectType<T>) {
 			...metadata,
 			[key]: Reflect.getMetadata(key, target)
 		}), {})
-}
+}*/
 
+/**
+ * Defines metadata on a target
+ * @param {ObjectType<T>} target
+ * @param {Metadata} metadata
+ */
 export function defineMetadata<T>(target: ObjectType<T>, metadata: Metadata) {
 	Object.keys(metadata || {}).forEach(key => {
 		Reflect.defineMetadata(key, metadata[key], target);
