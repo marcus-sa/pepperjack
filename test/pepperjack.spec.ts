@@ -3,26 +3,29 @@ import { expect } from 'chai';
 import { Pepperjack, Collection, Column } from '../src';
 import { MetadataStorage } from '../src/metadata';
 import { Repository } from '../src/repository';
+import { ColumnRequiredException } from '../src/exceptions';
 
 describe('Pepperjack', () => {
   let pepperJack: Pepperjack;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     MetadataStorage.empty();
     pepperJack = new Pepperjack({
       passphrase: 'yaCjUVs6(s^PYtJ{"]<>Cj3G',
+      repo: './test/data',
     });
+
+    await pepperJack.start();
   });
 
   afterEach(async () => {
-    await pepperJack.destroy();
+    await pepperJack.close();
   });
 
-  it('should register repositories', async () => {
+  it('should register collections', async () => {
     @Collection()
     class User {}
 
-    await pepperJack.start();
     await pepperJack.register([User]);
   });
 
@@ -30,11 +33,33 @@ describe('Pepperjack', () => {
     @Collection()
     class User {}
 
-    await pepperJack.start();
     await pepperJack.register([User]);
 
     const user = pepperJack.getRepository<User>(User);
     expect(user).to.be.instanceOf(Repository);
+  });
+
+  it('should throw required exception', async () => {
+    @Collection()
+    class User {
+
+      @Column({ required: true })
+      public username: string;
+
+      @Column()
+      public nickname: string;
+
+    }
+
+    await pepperJack.register([User]);
+    const userRepository = pepperJack.getRepository<User>(User);
+
+    const user = new User();
+    user.nickname = 'hey';
+
+    expect(async () => {
+      await userRepository.save(user);
+    }).to.throw(ColumnRequiredException);
   });
 
   /*it('should save new collection', async () => {

@@ -1,3 +1,4 @@
+// Cannot result module.exports
 import paramCase = require('param-case');
 
 import { CollectionOptions } from '../interfaces';

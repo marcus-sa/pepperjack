@@ -15,7 +15,7 @@ export type IPFSKey = {
   name: string;
 };
 
-export type CollectionKeys = {
+export type CollectionKey = {
   id: string;
   key: string;
 };

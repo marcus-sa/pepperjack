@@ -1,6 +1,7 @@
+// Cannot resolve module.exports
 import IPFS = require('ipfs');
 
-import { ObjectType, IPFSKey, CollectionKeys } from './types';
+import { ObjectType, IPFSKey, CollectionKey } from './types';
 import { COLLECTION_NAME_METADATA, MetadataStorage } from './metadata';
 import { Repository } from './repository';
 import { ColumnMetadata, DecoratorMetadata, PepperjackOptions } from './interfaces';
@@ -16,7 +17,7 @@ export class Pepperjack {
    * Will be used to encrypt and decrypt file content
    * @type {Map<string, CollectionKeys>}
    */
-	private ipfsKeys = new Map<string, CollectionKeys>();
+	private ipfsKeys = new Map<string, CollectionKey>();
 	public ipfs: IPFS;
 
 	constructor(
@@ -29,9 +30,10 @@ export class Pepperjack {
    * @returns {Promise<any>}
    */
 	public start() {
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve) => {
       this.ipfs = new IPFS({
-        pass: this.options.passphrase
+        pass: this.options.passphrase,
+        repo: this.options.repo,
       });
 
       this.ipfs.on('ready', () => {
@@ -44,8 +46,22 @@ export class Pepperjack {
    * Destroy Pepperjack
    * @returns {Promise<void>}
    */
-  public async destroy() {
+  public async close() {
 	  await this.ipfs.stop();
+  }
+
+  /**
+   * Create a repository
+   * @param {ObjectType<C>} collection
+   * @param {CollectionKey} key
+   * @returns {Repository<any>}
+   */
+  public createRepository<C>(collection: ObjectType<C>, key: CollectionKey) {
+    const columns = this.getColumnsByCollection(collection);
+    const getters = this.getGettersByCollection(collection);
+    const setters = this.getSettersByCollection(collection);
+
+    return new Repository(this.ipfs, collection, key, columns, getters, setters);
   }
 
   /**
@@ -58,14 +74,12 @@ export class Pepperjack {
 
 		const registry = collections.map(async (collection) => {
       const collectionName = this.getCollectionName(collection);
+      const key = await this.registerKey(collectionName, keys);
 
-      await this.registerKey(collectionName, keys);
+      // Prevent garbage collecting
+      // await this.ipfs.pin.add(key.id);
 
-      const columns = this.getColumnsByCollection(collection);
-      const getters = this.getGettersByCollection(collection);
-      const setters = this.getSettersByCollection(collection);
-
-      const repository = new Repository(collection, null, columns, getters, setters);
+      const repository = this.createRepository(collection, key);
       this.repositories.set(collectionName, repository);
 
       return repository;
@@ -78,13 +92,12 @@ export class Pepperjack {
    * Registers IPFS keys for each collection
    * @param {string} collectionName
    * @param {IPFSKey[]} keys
-   * @returns {Promise<void>}
+   * @returns {Promise<CollectionKey>}
    */
   private async registerKey(collectionName: string, keys: IPFSKey[]) {
 		let ipfsKey = this.findCollectionKey(collectionName, keys);
 
     if (!ipfsKey) {
-      console.log('generating key again');
       ipfsKey = await this.ipfs.key.gen(collectionName, {
         type: 'rsa',
         size: 2048,
@@ -93,10 +106,14 @@ export class Pepperjack {
 
     const privateKey = await this.ipfs.key.export(collectionName, this.options.passphrase);
 
-    this.ipfsKeys.set(collectionName, {
-    	id: ipfsKey.id,
-	    key: privateKey,
-    });
+    const data = {
+      id: ipfsKey.id,
+      key: privateKey,
+    } as CollectionKey;
+
+    this.ipfsKeys.set(collectionName, data);
+
+    return data;
   }
 
   /**
