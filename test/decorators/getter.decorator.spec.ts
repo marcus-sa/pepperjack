@@ -9,7 +9,7 @@ describe('@Getter', () => {
     MetadataStorage.empty();
   });
 
-  it('should have correct methodName', () => {
+  it('should have correct propertyName', () => {
     class User {
 
       @Getter('_id')
@@ -18,7 +18,7 @@ describe('@Getter', () => {
     }
 
     const getters = Array.from(MetadataStorage.getters);
-    expect(getters[0].methodName).to.equal('getId');
+    expect(getters[0].propertyName).to.equal('getId');
   });
 
   it('should have target be constructor of collection', () => {
@@ -42,6 +42,6 @@ describe('@Getter', () => {
     const user = new User();
 
     const getters = Array.from(MetadataStorage.getters);
-    expect(user).not.to.have.key(getters[0].methodName);
+    expect(user).not.to.have.key(getters[0].propertyName);
   });
 });

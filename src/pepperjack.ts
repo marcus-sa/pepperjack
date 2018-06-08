@@ -8,6 +8,7 @@ import { COLLECTION_NAME_METADATA, MetadataStorage } from './metadata';
 import { Repository } from './repository';
 import { ColumnMetadata, DecoratorMetadata, EmbeddedMetadata, GSMetadata, PepperjackOptions } from './interfaces';
 import { getDefaultOptions } from './utils';
+import { RepositoryUnknownException } from './exceptions';
 
 export class Pepperjack {
 
@@ -147,21 +148,12 @@ export class Pepperjack {
    */
 	public getRepository<C>(collection: ObjectType<C>): Repository<C> {
 		const collectionName = this.getCollectionName(collection);
-		/*if (!this.repositories.has(collectionName)) {
-      const columns = this.getColumnsByCollection<C>(collection);
-      const getters = this.getGettersByCollection<C>(collection);
-      const setters = this.getSettersByCollection<C>(collection);
 
-      const key: IPFSKey = await this.ipfs.gen(collectionName, {
-      	// should be in options
-      	type: 'rsa',
-	      size: 4096
-      });
+		if (!this.repositories.has(collectionName)) {
+		  throw new RepositoryUnknownException(collectionName);
+    }
 
-      return ;
-		}*/
-
-		return this.repositories.get(collectionName);
+		return this.repositories.get(collectionName) as Repository<C>;
   }
 
 }
