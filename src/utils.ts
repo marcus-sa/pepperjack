@@ -1,4 +1,5 @@
 import { ObjectType, Metadata } from './types';
+import { PepperjackOptions } from 'src/interfaces';
 
 /*export function validateMetadata(metadata: Metadata, metadataKeys: string[], name?: string) {
 	Object.keys(metadata || {}).forEach(key => {
@@ -33,3 +34,10 @@ export function defineMetadata<T>(target: ObjectType<T>, metadata: Metadata) {
 		Reflect.defineMetadata(key, metadata[key], target);
 	})
 }
+
+export const getDefaultOptions = () => ({
+  keys: {
+    type: 'rsa',
+    size: 2048
+  }
+});

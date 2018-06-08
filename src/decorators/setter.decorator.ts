@@ -8,12 +8,12 @@ import { MetadataStorage } from '../metadata';
  * @constructor
  */
 export function Setter(column: string): MethodDecorator {
-  return (target: ObjectType<any>, methodName: string) => {
+  return (target: ObjectType<any>, propertyName: string) => {
     //Reflect.defineMetadata(COLUMN_GETTER_METADATA, true, target, propertyName);
 
     MetadataStorage.setters.add({
       target: target.constructor,
-      methodName,
+      propertyName,
       column,
     });
   };

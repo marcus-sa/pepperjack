@@ -12,7 +12,7 @@ describe('@Collection', () => {
 		class TestBench {}
 
 		const collectionName = Reflect.getMetadata(COLLECTION_NAME_METADATA, TestBench);
-		expect(collectionName).to.equal(paramCase(TestBench.name));
+    expect(collectionName).to.equal(paramCase(TestBench.name));
 	});
 
 	it('should enhance class with expected metadata', () => {
