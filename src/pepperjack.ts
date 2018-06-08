@@ -42,7 +42,7 @@ export class Pepperjack {
 	public start() {
 		return new Promise((resolve) => {
       this.ipfs = new IPFS({
-        pass: this.options.passphrase,
+        pass: this.options.pass,
         repo: this.options.repo,
       });
 

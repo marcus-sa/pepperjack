@@ -10,4 +10,8 @@ export class StoreManager<C> {
     private readonly collectionKey: CollectionKey,
   ) {}
 
+  public getCollection() {
+
+  }
+
 }

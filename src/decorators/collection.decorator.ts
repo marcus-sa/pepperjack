@@ -1,10 +1,9 @@
-// Cannot result module.exports
-import paramCase = require('param-case');
-
 import { CollectionOptions } from '../interfaces';
 import { defineMetadata } from '../utils';
 import { COLLECTION_NAME_METADATA, COLLECTION_REPO_METADATA } from '../metadata';
 import { ObjectType } from '../types';
+
+const paramCase = require('param-case');
 
 /**
  *

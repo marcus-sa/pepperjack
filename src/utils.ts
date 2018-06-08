@@ -35,7 +35,7 @@ export function defineMetadata<T>(target: ObjectType<T>, metadata: Metadata) {
 	})
 }
 
-export const getDefaultOptions = (): PepperjackOptions => ({
+export const getDefaultOptions = () => ({
   keys: {
     type: 'rsa',
     size: 2048

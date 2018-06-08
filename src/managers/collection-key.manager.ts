@@ -28,7 +28,7 @@ export class CollectionKeyManager {
    * @returns {Promise<any>}
    */
   private async generatePrivateKey(collectionName: string) {
-    return await this.ipfs.key.export(collectionName, this.options.passphrase);
+    return await this.ipfs.key.export(collectionName, this.options.pass);
   }
 
   /**

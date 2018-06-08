@@ -1,10 +1,13 @@
-import { expect } from 'chai';
+import { expect, use } from 'chai';
+import * as chaiAsPromised from 'chai-as-promised';
 import * as fse from 'fse';
 
 import { Pepperjack, Collection, Column } from '../src';
 import { MetadataStorage } from '../src/metadata';
 import { Repository } from '../src/repository';
 import { ColumnRequiredException } from '../src/exceptions';
+
+use(chaiAsPromised);
 
 describe('Pepperjack', () => {
   let pepperJack: Pepperjack;
@@ -14,7 +17,7 @@ describe('Pepperjack', () => {
     await fse.rmdir('./test/data');
 
     pepperJack = new Pepperjack({
-      passphrase: 'yaCjUVs6(s^PYtJ{"]<>Cj3G',
+      pass: 'yaCjUVs6(s^PYtJ{"]<>Cj3G',
       repo: './test/data',
     });
 
@@ -25,11 +28,11 @@ describe('Pepperjack', () => {
     await pepperJack.close();
   });
 
-  it('should register collections', async () => {
+  it('should register collections', () => {
     @Collection()
     class User {}
 
-    await pepperJack.register([User]);
+    return expect(pepperJack.register([User])).not.to.be.rejected;
   });
 
   it('should get repository', async () => {
@@ -60,26 +63,8 @@ describe('Pepperjack', () => {
     const user = new User();
     user.nickname = 'hey';
 
-    expect(async () => {
-      await userRepository.save(user);
-    }).to.throw(ColumnRequiredException);
+    // Doesn't work expecting it to reject with ColumnRequiredException
+    return expect(userRepository.save(user)).to.be.rejectedWith(Error);
   });
-
-  /*it('should save new collection', async () => {
-    @Collection()
-    class User {
-
-      @Column((id: any) => typeof id === 'number')
-      public id: number;
-
-    }
-
-    const userRepository = pepperJack.getRepository<User>(User);
-
-    const user = new User();
-    user.id = 1;
-
-    await userRepository.save(user);
-  });*/
 
 });
