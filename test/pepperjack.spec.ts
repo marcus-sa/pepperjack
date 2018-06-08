@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import * as fse from 'fse';
 
 import { Pepperjack, Collection, Column } from '../src';
 import { MetadataStorage } from '../src/metadata';
@@ -10,6 +11,8 @@ describe('Pepperjack', () => {
 
   beforeEach(async () => {
     MetadataStorage.empty();
+    await fse.rmdir('./test/data');
+
     pepperJack = new Pepperjack({
       passphrase: 'yaCjUVs6(s^PYtJ{"]<>Cj3G',
       repo: './test/data',

@@ -12,7 +12,10 @@
     "outDir": "dist",
     "baseUrl": "."
   },
-  "include": ["src"],
+  "include": [
+    "src",
+    "node_modules/lodash-es"
+  ],
   "exclude": [
     "node_modules",
     "src/**/*.spec.ts"

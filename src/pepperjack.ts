@@ -1,32 +1,42 @@
 // Cannot resolve module.exports
 import IPFS = require('ipfs');
+import { merge } from 'lodash';
 
-import { ObjectType, IPFSKey, CollectionKey } from './types';
+import { ObjectType, CollectionKey } from './types';
+import { CollectionKeyManager } from './managers';
 import { COLLECTION_NAME_METADATA, MetadataStorage } from './metadata';
 import { Repository } from './repository';
-import { ColumnMetadata, DecoratorMetadata, PepperjackOptions } from './interfaces';
+import { ColumnMetadata, DecoratorMetadata, EmbeddedMetadata, GSMetadata, PepperjackOptions } from './interfaces';
+import { getDefaultOptions } from './utils';
 
 export class Pepperjack {
+
+  /**
+   * Pepperjack optio
+   */
+  private readonly options: PepperjackOptions;
 
   /**
    *  Storing all repositories
    * @type {Map<string, Repository<any>>}
    */
-  private repositories = new Map<string, Repository<any>>();
+  private readonly repositories = new Map<string, Repository<any>>();
   /**
    * Will be used to encrypt and decrypt file content
    * @type {Map<string, CollectionKeys>}
    */
-	private ipfsKeys = new Map<string, CollectionKey>();
 	public ipfs: IPFS;
 
-	constructor(
-		//private readonly ipfs: IPFS,
-		private readonly options: PepperjackOptions
-	) {}
+  /**
+   * Instantiate a new Pepperjack instance
+   * @param {PepperjackOptions} options
+   */
+	constructor(options: PepperjackOptions) {
+	  this.options = merge({}, options, getDefaultOptions());
+  }
 
   /**
-   * Starts the Pepperjack instance
+   * Start the Pepperjack instance
    * @returns {Promise<any>}
    */
 	public start() {
@@ -57,11 +67,12 @@ export class Pepperjack {
    * @returns {Repository<any>}
    */
   public createRepository<C>(collection: ObjectType<C>, key: CollectionKey) {
+    const embeddeds = this.getEmbeddedsByCollection(collection);
     const columns = this.getColumnsByCollection(collection);
     const getters = this.getGettersByCollection(collection);
     const setters = this.getSettersByCollection(collection);
 
-    return new Repository(this.ipfs, collection, key, columns, getters, setters);
+    return new Repository(this.ipfs, collection, key, embeddeds, columns, getters, setters);
   }
 
   /**
@@ -70,11 +81,12 @@ export class Pepperjack {
    * @returns {Promise<[Repository<any> , any]>}
    */
   public async register(collections: ObjectType<any>[]) {
-		const keys = await this.ipfs.key.list() || [];
+		const keys = await this.ipfs.key.list();
+    const collectionKeyManager = new CollectionKeyManager(this.ipfs, keys, this.options);
 
 		const registry = collections.map(async (collection) => {
       const collectionName = this.getCollectionName(collection);
-      const key = await this.registerKey(collectionName, keys);
+      const key = await collectionKeyManager.register(collectionName);
 
       // Prevent garbage collecting
       // await this.ipfs.pin.add(key.id);
@@ -86,44 +98,6 @@ export class Pepperjack {
 		});
 
     return await Promise.all(registry);
-  }
-
-  /**
-   * Registers IPFS keys for each collection
-   * @param {string} collectionName
-   * @param {IPFSKey[]} keys
-   * @returns {Promise<CollectionKey>}
-   */
-  private async registerKey(collectionName: string, keys: IPFSKey[]) {
-		let ipfsKey = this.findCollectionKey(collectionName, keys);
-
-    if (!ipfsKey) {
-      ipfsKey = await this.ipfs.key.gen(collectionName, {
-        type: 'rsa',
-        size: 2048,
-      });
-    }
-
-    const privateKey = await this.ipfs.key.export(collectionName, this.options.passphrase);
-
-    const data = {
-      id: ipfsKey.id,
-      key: privateKey,
-    } as CollectionKey;
-
-    this.ipfsKeys.set(collectionName, data);
-
-    return data;
-  }
-
-  /**
-   * Find key in collection by name
-   * @param {string} collectionName
-   * @param {IPFSKey[]} keys
-   * @returns {IPFSKey | undefined}
-   */
-  private findCollectionKey<C>(collectionName: string, keys: IPFSKey[]) {
-		return keys.find(key => key.name === collectionName);
   }
 
   /**
@@ -150,16 +124,20 @@ export class Pepperjack {
 		);
 	}
 
+	private getEmbeddedsByCollection<C>(collection: ObjectType<C>) {
+	  return this.getByCollection<EmbeddedMetadata>(MetadataStorage.embeddeds, collection);
+  }
+
 	private getColumnsByCollection<C>(collection: ObjectType<C>) {
 		return this.getByCollection<ColumnMetadata>(MetadataStorage.columns, collection);
   }
 
   private getGettersByCollection<C>(collection: ObjectType<C>) {
-		return this.getByCollection(MetadataStorage.getters, collection);
+		return this.getByCollection<GSMetadata>(MetadataStorage.getters, collection);
   }
 
   private getSettersByCollection<C>(collection: ObjectType<C>) {
-    return this.getByCollection(MetadataStorage.setters, collection);
+    return this.getByCollection<GSMetadata>(MetadataStorage.setters, collection);
   }
 
   /**
