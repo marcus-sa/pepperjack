@@ -1,13 +1,14 @@
 import IPFS from 'ipfs';
 
-import { CollectionKey, ObjectType } from './types';
+import { CollectionKey, ObjectType, Repositories } from './types';
 import { ColumnMetadata, EmbeddedMetadata, GSMetadata } from './interfaces';
-import { ColumnManager } from './managers';
+import { ColumnManager, EmbeddedManager } from './managers';
 
 export class Repository<C> {
 
   constructor(
     private readonly ipfs: IPFS,
+    private readonly repositories: Repositories,
     private readonly collection: ObjectType<C>,
     private readonly key: CollectionKey,
     private readonly embeddeds: EmbeddedMetadata[],
@@ -30,16 +31,34 @@ export class Repository<C> {
 
   }
 
-  private getColumnKeys() {
+  /*private getColumnKeys() {
     return this.columns.map(column => column.propertyName);
-  }
+  }*/
 
-  private filterDataByColumns(collection: C) {
+  public static filterColumns<C>(columns: ColumnMetadata[], collection: C) {
     return Object.keys(collection).filter(
-      (property => this.columns.find(
+      (property => columns.find(
         (column) => property === column.propertyName)
       )
     );
+  }
+
+  public static async manageColumns<C>(columns: ColumnMetadata[], collection: C, insertData, storedData) {
+    const assertedColumns = columns.map(async (column) => {
+      const columnManager = new ColumnManager<C>(column, insertData, storedData);
+      return await columnManager.assert();
+    });
+
+    return await Promise.all(assertedColumns);
+  }
+
+  public static async manageEmbeddeds<C>(embeddeds: EmbeddedMetadata[], repositories: Repositories, insertData, storedData) {
+    const assertedEmbeddeds = embeddeds.map(async (embedded) => {
+      const embeddedMananger = new EmbeddedManager<C>(embedded, repositories, insertData, storedData);
+      return await embeddedMananger.assert();
+    });
+
+    return await Promise.all(assertedEmbeddeds);
   }
 
   /**
@@ -55,17 +74,15 @@ export class Repository<C> {
 
     // @TODO: Clean this garbage pseudo code up
     const executors = collections.map(async (collection) => {
-      const insertColumns = this.filterDataByColumns(collection);
+      // fake
+      const storedData = {};
+      const insertColumns = Repository.filterColumns<C>(this.columns, collection);
       const insertData = insertColumns.map(column => collection[column]);
 
-      const assertedColumns = this.columns.map(async (column) => {
-        //const value = data[column.propertyName];
+      await Repository.manageColumns(this.columns, collection, insertData,storedData);
+      await Repository.manageEmbeddeds(this.embeddeds, this.repositories, insertData, storedData);
 
-        const columnManager = new ColumnManager<C>(column, insertData, null);
-        return await columnManager.assert();
-      });
-
-      return await Promise.all(assertedColumns);
+      //return await Promise.all([columns, embeddeds]);
     });
 
     return await Promise.all(executors);

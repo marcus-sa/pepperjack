@@ -20,7 +20,7 @@ export function Collection<T>(metadata: CollectionOptions = {}): ClassDecorator 
 	return (target: ObjectType<T>) => {
     if (!metadata.name) metadata.name = paramCase(target.name);
 
-		defineMetadata(target, {
+		defineMetadata(target.constructor, {
 		  [COLLECTION_REPO_METADATA]: metadata.repo,
 			[COLLECTION_NAME_METADATA]: metadata.name
 		});

@@ -1,4 +1,5 @@
 import { ColumnEmbeddedOptions, ColumnOptions } from './interfaces';
+import { Repository } from './repository';
 
 export type ColumnType = 'int' | 'number' | 'float' | 'string' | 'boolean' | 'date';
 
@@ -19,5 +20,7 @@ export type CollectionKey = {
   id: string;
   key: string;
 };
+
+export type Repositories = Map<string, Repository<any>>;
 
 //export type ColumnCustomValidator = (columnValue: string) => Promise<any> | boolean;

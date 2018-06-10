@@ -1,5 +1,5 @@
 import { ObjectType, Metadata } from './types';
-import { PepperjackOptions } from 'src/interfaces';
+import { ColumnMetadata, PepperjackOptions } from 'src/interfaces';
 
 /*export function validateMetadata(metadata: Metadata, metadataKeys: string[], name?: string) {
 	Object.keys(metadata || {}).forEach(key => {

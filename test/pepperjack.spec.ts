@@ -67,4 +67,56 @@ describe('Pepperjack', () => {
     return expect(userRepository.save(user)).to.be.rejectedWith(Error);
   });
 
+  it('should save collection without instantiating', async () => {
+    @Collection()
+    class User {
+
+      @Column({ required: true })
+      public username: string;
+
+    }
+
+    await pepperJack.register([User]);
+    const userRepository = pepperJack.getRepository<User>(User);
+
+    return expect(userRepository.save({
+      username: 'lol'
+    })).not.to.be.rejected;
+  });
+
+  it('should do recursive embedded', async () => {
+    @Collection()
+    class Post {
+
+      @Column({ required: true })
+      public title: string;
+
+      @Column({ required: true })
+      public content: string;
+
+    }
+
+    @Collection()
+    class User {
+
+      @Column({ required: true })
+      public username: string;
+
+      @Column(() => Post)
+      public posts: Post[]
+
+    }
+
+    await pepperJack.register([Post, User]);
+    const userRepository = pepperJack.getRepository<User>(User);
+
+    return expect(userRepository.save({
+      username: 'lol',
+      posts: [{
+        title: 'Post #1',
+        content: 'lol'
+      }]
+    })).not.to.be.rejected;
+  });
+
 });

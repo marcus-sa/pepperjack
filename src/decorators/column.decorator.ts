@@ -17,7 +17,7 @@ export function Column(
 ): PropertyDecorator {
 	return (target: ObjectType<any>, propertyName: string) => {
     // normalize parameters
-		let type: ColumnType;
+		let type: ColumnType | undefined;
 		if (typeof typeOrOptions === 'string') {
 			type = <ColumnType> typeOrOptions;
 		} else if (typeOrOptions) {
@@ -34,10 +34,10 @@ export function Column(
 		if (typeOrOptions instanceof Function) {
 			MetadataStorage.embeddeds.add({
 				target: target.constructor,
-				propertyName,
-				isArray: reflectMetadataType === Array || options.array,
+				isArray: reflectMetadataType === Array || !!options.array,
 				prefix: options.prefix,
-				type: typeOrOptions as EmbeddedType
+				type: typeOrOptions as EmbeddedType,
+        propertyName,
 			});
 		} else {
       // check if there is no type in column options then set type from first function argument, or guessed one

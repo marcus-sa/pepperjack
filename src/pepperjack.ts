@@ -2,7 +2,7 @@
 import IPFS = require('ipfs');
 import { merge } from 'lodash';
 
-import { ObjectType, CollectionKey } from './types';
+import { ObjectType, CollectionKey, Repositories } from './types';
 import { CollectionKeyManager } from './managers';
 import { COLLECTION_NAME_METADATA, MetadataStorage } from './metadata';
 import { Repository } from './repository';
@@ -21,7 +21,7 @@ export class Pepperjack {
    *  Storing all repositories
    * @type {Map<string, Repository<any>>}
    */
-  private readonly repositories = new Map<string, Repository<any>>();
+  private readonly repositories: Repositories = new Map();
   /**
    * Will be used to encrypt and decrypt file content
    * @type {Map<string, CollectionKeys>}
@@ -68,12 +68,12 @@ export class Pepperjack {
    * @returns {Repository<any>}
    */
   public createRepository<C>(collection: ObjectType<C>, key: CollectionKey) {
-    const embeddeds = this.getEmbeddedsByCollection(collection);
-    const columns = this.getColumnsByCollection(collection);
-    const getters = this.getGettersByCollection(collection);
-    const setters = this.getSettersByCollection(collection);
+    const embeddeds = Pepperjack.getEmbeddedsByCollection(collection);
+    const columns = Pepperjack.getColumnsByCollection(collection);
+    const getters = Pepperjack.getGettersByCollection(collection);
+    const setters = Pepperjack.getSettersByCollection(collection);
 
-    return new Repository(this.ipfs, collection, key, embeddeds, columns, getters, setters);
+    return new Repository(this.ipfs, this.repositories, collection, key, embeddeds, columns, getters, setters);
   }
 
   /**
@@ -86,7 +86,7 @@ export class Pepperjack {
     const collectionKeyManager = new CollectionKeyManager(this.ipfs, keys, this.options);
 
 		const registry = collections.map(async (collection) => {
-      const collectionName = this.getCollectionName(collection);
+      const collectionName = Pepperjack.getCollectionName(collection);
       const key = await collectionKeyManager.register(collectionName);
 
       // Prevent garbage collecting
@@ -106,39 +106,33 @@ export class Pepperjack {
    * @param {ObjectType<C>} collection
    * @returns {any}
    */
-  public getCollectionName<C>(collection: ObjectType<C>) {
-    return Reflect.getMetadata(COLLECTION_NAME_METADATA, collection);
+  public static getCollectionName<C>(collection: ObjectType<C>) {
+    return Reflect.getMetadata(COLLECTION_NAME_METADATA, collection.constructor);
   }
 
-  /**
-   * Get metadata properties by collection
-   * @param {Set<S extends DecoratorMetadata>} store
-   * @param {ObjectType<any>} collection
-   * @returns {S[]}
-   */
-	private getByCollection<S extends DecoratorMetadata>(
-		store: Set<S>,
-		collection: ObjectType<any>
+	public static getByCollection<S extends DecoratorMetadata>(
+		metadata: Set<S>,
+		collection: ObjectType<any> | Function,
 	): S[] {
-		return Array.from(store).filter(
-			(value) => value.target instanceof collection.constructor
+		return Array.from(metadata).filter(
+			(value) => value.target instanceof (collection.constructor || collection)
 		);
 	}
 
-	private getEmbeddedsByCollection<C>(collection: ObjectType<C>) {
-	  return this.getByCollection<EmbeddedMetadata>(MetadataStorage.embeddeds, collection);
+	public static getEmbeddedsByCollection<C>(collection: ObjectType<C>) {
+	  return Pepperjack.getByCollection<EmbeddedMetadata>(MetadataStorage.embeddeds, collection.constructor);
   }
 
-	private getColumnsByCollection<C>(collection: ObjectType<C>) {
-		return this.getByCollection<ColumnMetadata>(MetadataStorage.columns, collection);
+  public static getColumnsByCollection<C>(collection: ObjectType<C>) {
+		return Pepperjack.getByCollection<ColumnMetadata>(MetadataStorage.columns, collection.constructor);
   }
 
-  private getGettersByCollection<C>(collection: ObjectType<C>) {
-		return this.getByCollection<GSMetadata>(MetadataStorage.getters, collection);
+  public static getGettersByCollection<C>(collection: ObjectType<C>) {
+		return Pepperjack.getByCollection<GSMetadata>(MetadataStorage.getters, collection.constructor);
   }
 
-  private getSettersByCollection<C>(collection: ObjectType<C>) {
-    return this.getByCollection<GSMetadata>(MetadataStorage.setters, collection);
+  public static getSettersByCollection<C>(collection: ObjectType<C>) {
+    return Pepperjack.getByCollection<GSMetadata>(MetadataStorage.setters, collection.constructor);
   }
 
   /**
@@ -147,7 +141,7 @@ export class Pepperjack {
    * @returns {Repository<C>}
    */
 	public getRepository<C>(collection: ObjectType<C>): Repository<C> {
-		const collectionName = this.getCollectionName(collection);
+		const collectionName = Pepperjack.getCollectionName(collection);
 
 		if (!this.repositories.has(collectionName)) {
 		  throw new RepositoryUnknownException(collectionName);
