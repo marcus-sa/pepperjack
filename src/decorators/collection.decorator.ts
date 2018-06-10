@@ -1,9 +1,9 @@
+import paramCase = require('param-case');
+
 import { CollectionOptions } from '../interfaces';
 import { defineMetadata } from '../utils';
 import { COLLECTION_NAME_METADATA, COLLECTION_REPO_METADATA } from '../metadata';
 import { ObjectType } from '../types';
-
-const paramCase = require('param-case');
 
 /**
  *
@@ -20,7 +20,7 @@ export function Collection<T>(metadata: CollectionOptions = {}): ClassDecorator 
 	return (target: ObjectType<T>) => {
     if (!metadata.name) metadata.name = paramCase(target.name);
 
-		defineMetadata(target.constructor, {
+		defineMetadata(target, { // collection.constructor
 		  [COLLECTION_REPO_METADATA]: metadata.repo,
 			[COLLECTION_NAME_METADATA]: metadata.name
 		});

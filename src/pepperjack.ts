@@ -2,18 +2,19 @@
 import IPFS = require('ipfs');
 import { merge } from 'lodash';
 
-import { ObjectType, CollectionKey, Repositories } from './types';
-import { CollectionKeyManager } from './managers';
-import { COLLECTION_NAME_METADATA, MetadataStorage } from './metadata';
-import { Repository } from './repository';
-import { ColumnMetadata, DecoratorMetadata, EmbeddedMetadata, GSMetadata, PepperjackOptions } from './interfaces';
-import { getDefaultOptions } from './utils';
 import { RepositoryUnknownException } from './exceptions';
+import { COLLECTION_NAME_METADATA, MetadataStorage } from './metadata';
+import { CollectionKeyManager } from './managers';
+import { Repository } from './repository';
+import { getDefaultOptions } from './utils';
+
+import { ObjectType, CollectionKey, Repositories } from './types';
+import { ColumnMetadata, DecoratorMetadata, EmbeddedMetadata, GSMetadata, PepperjackOptions } from './interfaces';
 
 export class Pepperjack {
 
   /**
-   * Pepperjack optio
+   * Pepperjack options
    */
   private readonly options: PepperjackOptions;
 
@@ -33,7 +34,7 @@ export class Pepperjack {
    * @param {PepperjackOptions} options
    */
 	constructor(options: PepperjackOptions) {
-	  this.options = merge({}, options, getDefaultOptions());
+	  this.options = merge({}, getDefaultOptions(), options);
   }
 
   /**
@@ -107,15 +108,15 @@ export class Pepperjack {
    * @returns {any}
    */
   public static getCollectionName<C>(collection: ObjectType<C>) {
-    return Reflect.getMetadata(COLLECTION_NAME_METADATA, collection.constructor);
+    return Reflect.getMetadata(COLLECTION_NAME_METADATA, collection); //collection.constructor
   }
 
 	public static getByCollection<S extends DecoratorMetadata>(
 		metadata: Set<S>,
-		collection: ObjectType<any> | Function,
+		target: Function,
 	): S[] {
 		return Array.from(metadata).filter(
-			(value) => value.target instanceof (collection.constructor || collection)
+			(value) => value.target instanceof target
 		);
 	}
 

@@ -2,7 +2,7 @@ import IPFS from 'ipfs';
 
 import { CollectionKey, ObjectType, Repositories } from './types';
 import { ColumnMetadata, EmbeddedMetadata, GSMetadata } from './interfaces';
-import { ColumnManager, EmbeddedManager } from './managers';
+import { Manager } from './managers';
 
 export class Repository<C> {
 
@@ -35,32 +35,6 @@ export class Repository<C> {
     return this.columns.map(column => column.propertyName);
   }*/
 
-  public static filterColumns<C>(columns: ColumnMetadata[], collection: C) {
-    return Object.keys(collection).filter(
-      (property => columns.find(
-        (column) => property === column.propertyName)
-      )
-    );
-  }
-
-  public static async manageColumns<C>(columns: ColumnMetadata[], collection: C, insertData, storedData) {
-    const assertedColumns = columns.map(async (column) => {
-      const columnManager = new ColumnManager<C>(column, insertData, storedData);
-      return await columnManager.assert();
-    });
-
-    return await Promise.all(assertedColumns);
-  }
-
-  public static async manageEmbeddeds<C>(embeddeds: EmbeddedMetadata[], repositories: Repositories, insertData, storedData) {
-    const assertedEmbeddeds = embeddeds.map(async (embedded) => {
-      const embeddedMananger = new EmbeddedManager<C>(embedded, repositories, insertData, storedData);
-      return await embeddedMananger.assert();
-    });
-
-    return await Promise.all(assertedEmbeddeds);
-  }
-
   /**
    * Save (insert/update) a collection to the database
    * @param {C[] | C} collections
@@ -76,11 +50,11 @@ export class Repository<C> {
     const executors = collections.map(async (collection) => {
       // fake
       const storedData = {};
-      const insertColumns = Repository.filterColumns<C>(this.columns, collection);
+      const insertColumns = Manager.filterColumns<C>(this.columns, collection);
       const insertData = insertColumns.map(column => collection[column]);
 
-      await Repository.manageColumns(this.columns, collection, insertData,storedData);
-      await Repository.manageEmbeddeds(this.embeddeds, this.repositories, insertData, storedData);
+      await Manager.assertColumns(this.columns, collection, insertData,storedData);
+      await Manager.assertEmbeddeds(this.embeddeds, this.repositories, insertData, storedData);
 
       //return await Promise.all([columns, embeddeds]);
     });
