@@ -1,7 +1,7 @@
 import { ColumnEmbeddedOptions, ColumnOptions } from '../interfaces';
 import { ObjectType, ColumnType, TypeOrOptions, EmbeddedType } from '../types';
 import { ColumnTypeUndefinedException } from '../exceptions';
-import { MODES, MetadataStorage } from '../metadata';
+import { MODES, MetadataStorage, COLLECTION_REPO_METADATA } from '../metadata';
 
 // @TODO: Add custom validation option
 /**

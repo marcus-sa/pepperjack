@@ -3883,7 +3883,7 @@ nyc@^12.0.2:
     rimraf "^2.6.2"
     signal-exit "^3.0.1"
     spawn-wrap "^1.4.2"
-    test-exclude "^4.2.0"
+    data-exclude "^4.2.0"
     yargs "11.1.0"
     yargs-parser "^8.0.0"
 
@@ -5221,7 +5221,7 @@ term-size@^1.2.0:
 
 test-exclude@^4.2.0:
   version "4.2.1"
-  resolved "https://registry.yarnpkg.com/test-exclude/-/test-exclude-4.2.1.tgz#dfa222f03480bca69207ca728b37d74b45f724fa"
+  resolved "https://registry.yarnpkg.com/data-exclude/-/data-exclude-4.2.1.tgz#dfa222f03480bca69207ca728b37d74b45f724fa"
   dependencies:
     arrify "^1.0.1"
     micromatch "^3.1.8"

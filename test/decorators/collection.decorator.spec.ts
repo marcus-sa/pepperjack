@@ -5,7 +5,7 @@ import { Collection } from '../../src';
 import { COLLECTION_NAME_METADATA, COLLECTION_REPO_METADATA } from '../../src/metadata';
 
 describe('@Collection', () => {
-	const name = 'test-collection';
+	const name = 'data-collection';
 
 	it('should set property name by class if not specified', () => {
 		@Collection()

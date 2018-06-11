@@ -8,7 +8,7 @@ export class ColumnManager<D> {
 
   constructor(
     private readonly column: ColumnMetadata,
-    private readonly insertData: D[],
+    private readonly insertData: D,
     private readonly storedData: D[],
   ) {}
 
@@ -22,7 +22,8 @@ export class ColumnManager<D> {
 
   private required() {
     if (this.column.options.required && !this.getColumnValue()) {
-      throw new ColumnRequiredException(this.column.target, this.column.propertyName);
+      throw new Error();
+      //throw new ColumnRequiredException(this.column.target, this.column.propertyName);
     }
   }
 

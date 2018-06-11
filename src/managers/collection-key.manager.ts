@@ -36,7 +36,7 @@ export class CollectionKeyManager {
    * @param {string} collectionName
    * @returns {Promise<CollectionKey>}
    */
-  public async register(collectionName: string) {
+  public async register(collectionName: string): Promise<CollectionKey> {
     const ipfsKey = this.findIpfsKey(collectionName) || await this.generateIpfsKey(collectionName);
     const privateKey = await this.generatePrivateKey(collectionName);
 

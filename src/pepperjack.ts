@@ -1,4 +1,5 @@
 // Cannot resolve module.exports
+import 'reflect-metadata';
 import IPFS = require('ipfs');
 import { merge } from 'lodash';
 
@@ -6,10 +7,10 @@ import { RepositoryUnknownException } from './exceptions';
 import { COLLECTION_NAME_METADATA, MetadataStorage } from './metadata';
 import { CollectionKeyManager } from './managers';
 import { Repository } from './repository';
-import { getDefaultOptions } from './utils';
+import { Utils } from './utils';
 
 import { ObjectType, CollectionKey, Repositories } from './types';
-import { ColumnMetadata, DecoratorMetadata, EmbeddedMetadata, GSMetadata, PepperjackOptions } from './interfaces';
+import { PepperjackOptions } from './interfaces';
 
 export class Pepperjack {
 
@@ -34,7 +35,7 @@ export class Pepperjack {
    * @param {PepperjackOptions} options
    */
 	constructor(options: PepperjackOptions) {
-	  this.options = merge({}, getDefaultOptions(), options);
+	  this.options = merge({}, Utils.getDefaultOptions(), options);
   }
 
   /**
@@ -62,26 +63,15 @@ export class Pepperjack {
 	  await this.ipfs.stop();
   }
 
-  /**
-   * Create a repository
-   * @param {ObjectType<C>} collection
-   * @param {CollectionKey} key
-   * @returns {Repository<any>}
-   */
-  public createRepository<C>(collection: ObjectType<C>, key: CollectionKey) {
-    const embeddeds = Pepperjack.getEmbeddedsByCollection(collection);
-    const columns = Pepperjack.getColumnsByCollection(collection);
-    const getters = Pepperjack.getGettersByCollection(collection);
-    const setters = Pepperjack.getSettersByCollection(collection);
+  public createRepository(collection: ObjectType<any>, key: CollectionKey) {
+    const embeddeds = MetadataStorage.getEmbeddedsByCollection(collection);
+    const columns = MetadataStorage.getColumnsByCollection(collection);
+    const getters = MetadataStorage.getGettersByCollection(collection);
+    const setters = MetadataStorage.getSettersByCollection(collection);
 
     return new Repository(this.ipfs, this.repositories, collection, key, embeddeds, columns, getters, setters);
   }
 
-  /**
-   * Registers all collections
-   * @param {ObjectType<any>[]} collections
-   * @returns {Promise<[Repository<any> , any]>}
-   */
   public async register(collections: ObjectType<any>[]) {
 		const keys = await this.ipfs.key.list();
     const collectionKeyManager = new CollectionKeyManager(this.ipfs, keys, this.options);
@@ -107,33 +97,8 @@ export class Pepperjack {
    * @param {ObjectType<C>} collection
    * @returns {any}
    */
-  public static getCollectionName<C>(collection: ObjectType<C>) {
+  public static getCollectionName(collection: Function) {
     return Reflect.getMetadata(COLLECTION_NAME_METADATA, collection); //collection.constructor
-  }
-
-	public static getByCollection<S extends DecoratorMetadata>(
-		metadata: Set<S>,
-		target: Function,
-	): S[] {
-		return Array.from(metadata).filter(
-			(value) => value.target instanceof target
-		);
-	}
-
-	public static getEmbeddedsByCollection<C>(collection: ObjectType<C>) {
-	  return Pepperjack.getByCollection<EmbeddedMetadata>(MetadataStorage.embeddeds, collection.constructor);
-  }
-
-  public static getColumnsByCollection<C>(collection: ObjectType<C>) {
-		return Pepperjack.getByCollection<ColumnMetadata>(MetadataStorage.columns, collection.constructor);
-  }
-
-  public static getGettersByCollection<C>(collection: ObjectType<C>) {
-		return Pepperjack.getByCollection<GSMetadata>(MetadataStorage.getters, collection.constructor);
-  }
-
-  public static getSettersByCollection<C>(collection: ObjectType<C>) {
-    return Pepperjack.getByCollection<GSMetadata>(MetadataStorage.setters, collection.constructor);
   }
 
   /**
@@ -145,7 +110,7 @@ export class Pepperjack {
 		const collectionName = Pepperjack.getCollectionName(collection);
 
 		if (!this.repositories.has(collectionName)) {
-		  throw new RepositoryUnknownException(collectionName);
+      throw new RepositoryUnknownException(collectionName);
     }
 
 		return this.repositories.get(collectionName) as Repository<C>;

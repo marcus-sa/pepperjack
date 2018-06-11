@@ -1,6 +1,29 @@
 import { ObjectType, Metadata } from './types';
 import { ColumnMetadata, PepperjackOptions } from 'src/interfaces';
 
+export abstract class Utils {
+
+  /**
+   * Defines metadata on a target
+   * @param {ObjectType<T>} target
+   * @param {Metadata} metadata
+   */
+  static defineMetadata<T>(target: ObjectType<T>, metadata: Metadata) {
+    Object.keys(metadata || {}).forEach(key => {
+      Reflect.defineMetadata(key, metadata[key], target);
+    })
+  }
+
+  static getDefaultOptions = (): PepperjackOptions => ({
+    pass: '', // should be defined by user
+    keys: {
+      type: 'rsa',
+      size: 2048
+    }
+  });
+
+}
+
 /*export function validateMetadata(metadata: Metadata, metadataKeys: string[], name?: string) {
 	Object.keys(metadata || {}).forEach(key => {
 		if (metadataKeys.includes(key)) return;
@@ -23,22 +46,3 @@ export function getMetadata<T>(target: ObjectType<T>) {
 			[key]: Reflect.getMetadata(key, target)
 		}), {})
 }*/
-
-/**
- * Defines metadata on a target
- * @param {ObjectType<T>} target
- * @param {Metadata} metadata
- */
-export function defineMetadata<T>(target: ObjectType<T>, metadata: Metadata) {
-	Object.keys(metadata || {}).forEach(key => {
-		Reflect.defineMetadata(key, metadata[key], target);
-	})
-}
-
-export const getDefaultOptions = (): PepperjackOptions => ({
-  pass: '', // should be defined by user
-  keys: {
-    type: 'rsa',
-    size: 2048
-  }
-});

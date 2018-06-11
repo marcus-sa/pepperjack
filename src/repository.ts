@@ -51,10 +51,10 @@ export class Repository<C> {
       // fake
       const storedData = {};
       const insertColumns = Manager.filterColumns<C>(this.columns, collection);
-      const insertData = insertColumns.map(column => collection[column]);
+      Manager.validateColumns(collection, insertColumns);
 
-      await Manager.assertColumns(this.columns, collection, insertData,storedData);
-      await Manager.assertEmbeddeds(this.embeddeds, this.repositories, insertData, storedData);
+      await Manager.assertColumns(this.columns, collection, storedData);
+      await Manager.assertEmbeddeds(this.embeddeds, this.repositories, collection, storedData);
 
       //return await Promise.all([columns, embeddeds]);
     });

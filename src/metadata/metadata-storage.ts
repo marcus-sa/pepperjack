@@ -1,39 +1,48 @@
-import { ColumnMetadata, GSMetadata, EmbeddedMetadata } from '../interfaces';
+import { ColumnMetadata, GSMetadata, EmbeddedMetadata, DecoratorMetadata } from '../interfaces';
 
 export abstract class MetadataStorage {
 
-  /**
-   * Embedded columns for collections
-   * @type {Set<EmbeddedMetadata>}
-   */
   public static embeddeds = new Set<EmbeddedMetadata>();
 
-  /**
-   * Columns for collections
-   * @type {Set<ColumnMetadata>}
-   */
   public static columns = new Set<ColumnMetadata>();
 
-  /**
-   * Getters for collections
-   * @type {Set<GSMetadata>}
-   */
   public static getters = new Set<GSMetadata>();
 
-  /**
-   * Setters for collections
-   * @type {Set<GSMetadata>}
-   */
   public static setters = new Set<GSMetadata>();
 
-  /**
-   * Clears all stored metadata
-   */
   public static empty() {
     this.embeddeds.clear();
     this.columns.clear();
     this.getters.clear();
     this.setters.clear();
+  }
+
+  private static getByCollection<S extends DecoratorMetadata>(
+    metadata: Set<S>,
+    collection: Function,
+  ): S[] {
+    return Array.from(metadata).filter(
+      (value) => (
+        value.target === collection /*||
+        value.target.name === collection.name*/
+      )
+    );
+  }
+
+  public static getEmbeddedsByCollection(collection: Function) {
+    return this.getByCollection<EmbeddedMetadata>(this.embeddeds, collection);
+  }
+
+  public static getColumnsByCollection(collection: Function) {
+    return this.getByCollection<ColumnMetadata>(this.columns, collection);
+  }
+
+  public static getGettersByCollection(collection: Function) {
+    return this.getByCollection<GSMetadata>(this.getters, collection);
+  }
+
+  public static getSettersByCollection(collection: Function) {
+    return this.getByCollection<GSMetadata>(this.setters, collection);
   }
 
 }
