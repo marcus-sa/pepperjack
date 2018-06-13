@@ -1,15 +1,24 @@
 import { ColumnEmbeddedOptions, ColumnOptions } from './interfaces';
 import { Repository } from './repository';
 
-export type ColumnType = 'int' | 'number' | 'float' | 'string' | 'boolean' | 'date';
+export type ColumnType =
+  | 'int'
+  | 'number'
+  | 'float'
+  | 'string'
+  | 'boolean'
+  | 'date';
 
-export type Metadata = { [key: string]: any; };
+export type Metadata = { [key: string]: any };
 
-export type ObjectType<T> = { new(): T };// | Function;
+export type ObjectType<T> = { new (): T }; // | Function;
 
-export type EmbeddedType = (/*type?: any*/) => ObjectType<any>;
+export type EmbeddedType = () => /*type?: any*/ ObjectType<any>;
 
-export type TypeOrOptions = ColumnType | EmbeddedType | (ColumnOptions & ColumnEmbeddedOptions);
+export type TypeOrOptions =
+  | ColumnType
+  | EmbeddedType
+  | (ColumnOptions & ColumnEmbeddedOptions);
 
 export type IPFSKey = {
   id: string;

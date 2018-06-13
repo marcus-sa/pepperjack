@@ -4,7 +4,6 @@ import { IPFSKey, CollectionKey } from '../types';
 import { PepperjackOptions } from '../interfaces';
 
 export class CollectionKeyManager {
-
   private readonly collectionKeys = new Map<string, CollectionKey>();
 
   constructor(
@@ -19,7 +18,10 @@ export class CollectionKeyManager {
    * @returns {Promise<IPFSKey>}
    */
   private async generateIpfsKey(collectionName: string) {
-    return await this.ipfs.key.gen(collectionName, this.options.keys) as IPFSKey;
+    return (await this.ipfs.key.gen(
+      collectionName,
+      this.options.keys,
+    )) as IPFSKey;
   }
 
   /**
@@ -37,7 +39,9 @@ export class CollectionKeyManager {
    * @returns {Promise<CollectionKey>}
    */
   public async register(collectionName: string): Promise<CollectionKey> {
-    const ipfsKey = this.findIpfsKey(collectionName) || await this.generateIpfsKey(collectionName);
+    const ipfsKey =
+      this.findIpfsKey(collectionName) ||
+      (await this.generateIpfsKey(collectionName));
     const privateKey = await this.generatePrivateKey(collectionName);
 
     const data = {
@@ -66,5 +70,4 @@ export class CollectionKeyManager {
   private findIpfsKey<C>(collectionName: string) {
     return this.ipfsKeys.find(key => key.name === collectionName);
   }
-
 }

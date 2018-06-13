@@ -5,11 +5,9 @@
 import { ObjectType } from '../../types';
 
 export class ColumnRequiredException extends Error {
-
   //public name = 'ColumnRequiredException';
 
   constructor(target: ObjectType<any>, propertyName: string) {
     super(`Column ${propertyName} is required in ${target.name}!`);
   }
-
 }

@@ -1,7 +1,6 @@
 import { ColumnType } from '../../types';
 
 export interface ColumnOptions {
-
   /**
    * Column type. Must be one of the value from the ColumnTypes class.
    */
@@ -15,29 +14,28 @@ export interface ColumnOptions {
   /**
    * Column name in the database.
    */
-	name?: string;
+  name?: string;
 
   /**
    * Indicates if this column is an array.
    * Can be simply set to true or array length can be specified.
    */
-	array?: boolean;
+  array?: boolean;
 
   /**
    * Specifies if column's value must be unique or not.
    */
-	unique?: boolean;
+  unique?: boolean;
 
   /**
    * Indicates if this column is a primary key.
    * Same can be achieved when @PrimaryColumn decorator is used.
    */
-	primary?: boolean;
+  primary?: boolean;
 
   /**
    * Indicates if this column is required when inserting.
    * Is true by default.
    */
   required?: boolean;
-
 }

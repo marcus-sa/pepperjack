@@ -8,7 +8,6 @@ import { ObjectType, Repositories } from '../types';
 import { Utils } from '../utils';
 
 export class EmbeddedManager<Data> {
-
   private readonly type: ObjectType<any>;
 
   constructor(
@@ -48,18 +47,22 @@ export class EmbeddedManager<Data> {
     const columns = MetadataStorage.getColumnsByCollection(this.type);
     const currentColumnData = Utils.toArray(this.getEmbeddedData());
 
-    return Promise.all(currentColumnData.map(async (insertData) => {
-      const insertColumns = Manager.filterMetadata<ColumnMetadata[], Data>(columns, insertData);
-      Manager.validateColumns(insertData, insertColumns);
+    return Promise.all(
+      currentColumnData.map(async insertData => {
+        const insertColumns = Manager.filterMetadata<ColumnMetadata[], Data>(
+          columns,
+          insertData,
+        );
+        Manager.validateColumns(insertData, insertColumns);
 
-      const pickedData = pick(insertData, insertColumns);
-      await Manager.assertColumns(columns, pickedData, this.storedData);
+        const pickedData = pick(insertData, insertColumns);
+        await Manager.assertColumns(columns, pickedData, this.storedData);
 
-      const leftOverData = omit(insertData, insertColumns);
-      if (Object.keys(leftOverData).length > 0) {
-        await this.traverse(leftOverData);
-      }
-    }));
+        const leftOverData = omit(insertData, insertColumns);
+        if (Object.keys(leftOverData).length > 0) {
+          await this.traverse(leftOverData);
+        }
+      }),
+    );
   }
-
 }

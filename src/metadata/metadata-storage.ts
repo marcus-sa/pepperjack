@@ -1,7 +1,11 @@
-import { ColumnMetadata, GSMetadata, EmbeddedMetadata, DecoratorMetadata } from '../interfaces';
+import {
+  ColumnMetadata,
+  GSMetadata,
+  EmbeddedMetadata,
+  DecoratorMetadata,
+} from '../interfaces';
 
 export abstract class MetadataStorage {
-
   public static embeddeds = new Set<EmbeddedMetadata>();
 
   public static columns = new Set<ColumnMetadata>();
@@ -22,10 +26,10 @@ export abstract class MetadataStorage {
     collection: Function,
   ): S[] {
     return Array.from(metadata).filter(
-      (value) => (
-        value.target === collection /*||
-        value.target.name === collection.name*/
-      )
+      value =>
+        value.target ===
+        collection /*||
+        value.target.name === collection.name*/,
     );
   }
 
@@ -44,5 +48,4 @@ export abstract class MetadataStorage {
   public static getSettersByCollection(collection: Function) {
     return this.getByCollection<GSMetadata>(this.setters, collection);
   }
-
 }

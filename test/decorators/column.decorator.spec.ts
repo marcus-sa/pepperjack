@@ -10,13 +10,9 @@ describe('@Column', () => {
   });
 
   describe('-> Column metadata', () => {
-
     it('should guess native type by design:type', () => {
       class User {
-
-        @Column()
-        public _id: string;
-
+        @Column() public _id: string;
       }
 
       const columns = Array.from(MetadataStorage.columns);
@@ -28,10 +24,7 @@ describe('@Column', () => {
       class Post {}
 
       class User {
-
-        @Column()
-        public posts: Post
-
+        @Column() public posts: Post;
       }
 
       const columns = Array.from(MetadataStorage.columns);
@@ -40,10 +33,7 @@ describe('@Column', () => {
 
     it('should set type by first argument', () => {
       class User {
-
-        @Column('string')
-        public _id: string;
-
+        @Column('string') public _id: string;
       }
 
       const columns = Array.from(MetadataStorage.columns);
@@ -52,10 +42,7 @@ describe('@Column', () => {
 
     it('should have correct propertyName', () => {
       class User {
-
-        @Column()
-        public _id: string;
-
+        @Column() public _id: string;
       }
 
       const columns = Array.from(MetadataStorage.columns);
@@ -64,10 +51,7 @@ describe('@Column', () => {
 
     it('should have target be instance of collection', () => {
       class User {
-
-        @Column()
-        public _id: string;
-
+        @Column() public _id: string;
       }
 
       const columns = Array.from(MetadataStorage.columns);
@@ -76,8 +60,7 @@ describe('@Column', () => {
 
     it('should have correct mode', () => {
       class Test {
-        @Column()
-        public _id: string;
+        @Column() public _id: string;
       }
 
       const columns = Array.from(MetadataStorage.columns);
@@ -97,7 +80,5 @@ describe('@Column', () => {
     });*/
   });
 
-  describe('-> Embedded metadata', () => {
-
-  });
+  describe('-> Embedded metadata', () => {});
 });

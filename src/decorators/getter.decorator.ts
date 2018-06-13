@@ -1,5 +1,5 @@
 import { ObjectType } from '../types';
-import { MetadataStorage/*, COLUMN_GETTER_METADATA*/ } from '../metadata';
+import { MetadataStorage /*, COLUMN_GETTER_METADATA*/ } from '../metadata';
 
 /**
  *

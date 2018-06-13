@@ -5,5 +5,5 @@ export interface PepperjackOptions {
   keys?: {
     type: 'rsa';
     size: 1024 | 2048 | 4096;
-  }
+  };
 }

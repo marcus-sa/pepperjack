@@ -5,7 +5,6 @@ import { ColumnRequiredException } from '../exceptions/index';
 
 // @TODO: Clean this garbage up
 export class ColumnManager<D> {
-
   constructor(
     private readonly column: ColumnMetadata,
     private readonly insertData: D,
@@ -37,8 +36,8 @@ export class ColumnManager<D> {
     const value = this.getColumnValue();
 
     if (this.column.options.unique && value) {
-      const notUnique = this.storedData.find(
-        (columns) => isEqual(columns[this.column.propertyName], value)
+      const notUnique = this.storedData.find(columns =>
+        isEqual(columns[this.column.propertyName], value),
       );
 
       /*if (notUnique) {
@@ -54,5 +53,4 @@ export class ColumnManager<D> {
 
     return this;
   }
-
 }

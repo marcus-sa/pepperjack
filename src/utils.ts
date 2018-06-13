@@ -2,7 +2,6 @@ import { ObjectType, Metadata } from './types';
 import { PepperjackOptions } from './interfaces';
 
 export class Utils {
-
   public static loggers = new Set();
 
   /**
@@ -13,7 +12,7 @@ export class Utils {
   public static defineMetadata<T>(target: ObjectType<T>, metadata: Metadata) {
     Object.keys(metadata || {}).forEach(key => {
       Reflect.defineMetadata(key, metadata[key], target);
-    })
+    });
   }
 
   public static getDefaultOptions = (): PepperjackOptions => ({
@@ -21,11 +20,11 @@ export class Utils {
     dev: process.env.NODE_ENV !== 'production',
     keys: {
       type: 'rsa',
-      size: 2048
-    }
+      size: 2048,
+    },
   });
 
-  public static toArray = (arr) => !Array.isArray(arr) ? [arr] : arr;
+  public static toArray = arr => (!Array.isArray(arr) ? [arr] : arr);
 
   /*export function hasIn(obj: object, keys: string[], filter: (keys: string[], key: string) => boolean) {
     Object.keys(obj).filter(
@@ -43,7 +42,6 @@ export class Utils {
   export function omit(obj, keys) {
     return Utils.hasIn(obj, keys, (keys, key) => !keys.includes(key));
   }*/
-
 }
 
 /*export function validateMetadata(metadata: Metadata, metadataKeys: string[], name?: string) {

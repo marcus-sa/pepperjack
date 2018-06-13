@@ -11,10 +11,8 @@ describe('@Getter', () => {
 
   it('should have correct propertyName', () => {
     class User {
-
       @Getter('_id')
       private getId() {}
-
     }
 
     const getters = Array.from(MetadataStorage.getters);
@@ -33,10 +31,8 @@ describe('@Getter', () => {
 
   it('should not exist on instantiated collection', () => {
     class User {
-
       @Getter('_id')
       private modifyId() {}
-
     }
 
     const user = new User();

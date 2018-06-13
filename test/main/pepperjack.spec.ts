@@ -48,13 +48,10 @@ describe('Pepperjack', () => {
   it('should throw required exception', async () => {
     @Collection()
     class User {
-
       @Column({ required: true })
       public username: string;
 
-      @Column()
-      public nickname: string;
-
+      @Column() public nickname: string;
     }
 
     await pepperJack.register([User]);
@@ -74,97 +71,95 @@ describe('Pepperjack', () => {
   it('should save collection without instantiating', async () => {
     @Collection()
     class User {
-
       @Column({ required: true })
       public username: string;
-
     }
 
     await pepperJack.register([User]);
     const userRepository = pepperJack.getRepository<User>(User);
 
-    return expect(userRepository.save({
-      username: 'lol'
-    } as User)).not.to.be.rejected;
+    return expect(
+      userRepository.save({
+        username: 'lol',
+      } as User),
+    ).not.to.be.rejected;
   });
 
   it('should do embedded', async () => {
     @Collection()
     class Post {
-
       @Column({ required: true })
       public title: string;
 
       @Column({ required: true })
       public content: string;
-
     }
 
     @Collection()
     class User {
-
       @Column({ required: true })
       public username: string;
 
       @Column(() => Post)
       public post: Post;
-
     }
 
     await pepperJack.register([Post, User]);
     const userRepository = pepperJack.getRepository<User>(User);
 
-    return expect(userRepository.save({
-      username: 'lol',
-      post: {
-        title: 'Post #1',
-        content: 'lol'
-      }
-    })).not.to.be.rejected;
+    return expect(
+      userRepository.save({
+        username: 'lol',
+        post: {
+          title: 'Post #1',
+          content: 'lol',
+        },
+      }),
+    ).not.to.be.rejected;
   });
 
   it('should do array embedded', async () => {
     @Collection()
     class Post {
-
       @Column({ required: true })
       public title: string;
 
       @Column({ required: true })
       public content: string;
-
     }
 
     @Collection()
     class User {
-
       @Column({ required: true })
       public username: string;
 
       @Column(() => Post)
       public post: Post[];
-
     }
 
     await pepperJack.register([Post, User]);
     const userRepository = pepperJack.getRepository<User>(User);
 
-    return expect(userRepository.save({
-      username: 'lol',
-      post: [{
-        title: 'Post #1',
-        content: 'lol',
-      }, {
-        title: 'Post #2',
-        content: 'test',
-      }]
-    })).not.to.be.rejected;
+    return expect(
+      userRepository.save({
+        username: 'lol',
+        post: [
+          {
+            title: 'Post #1',
+            content: 'lol',
+          },
+          {
+            title: 'Post #2',
+            content: 'test',
+          },
+        ],
+      }),
+    ).not.to.be.rejected;
   });
 
   it('should do recursive embedded', async () => {
     @Collection({ embedded: true })
     class Coffee {
-
       @Column({ required: true })
       public name: string;
 
@@ -173,23 +168,18 @@ describe('Pepperjack', () => {
 
       @Column({ required: true })
       public origin: string;
-
     }
 
     @Collection({ embedded: true })
     class Information {
-
-      @Column()
-      public data?: string;
+      @Column() public data?: string;
 
       @Column(() => Coffee)
       public coffee?: Coffee[];
-
     }
 
     @Collection({ embedded: true })
     class Post {
-
       @Column({ required: true })
       public title: string;
 
@@ -198,41 +188,44 @@ describe('Pepperjack', () => {
 
       @Column(() => Information)
       public external?: Information;
-
     }
 
     @Collection()
     class User {
-
       @Column({ required: true })
       public username: string;
 
       @Column(() => Post)
       public post?: Post[];
-
     }
 
     await pepperJack.register([Information, Post, User, Coffee]);
     const userRepository = pepperJack.getRepository<User>(User);
 
-    return expect(userRepository.save({
-      username: 'lol',
-      post: [{
-        title: 'Post #1',
-        content: 'lol',
-      }, {
-        title: 'Post #2',
-        content: 'test',
-        external: {
-          data: 'something',
-          coffee: [{
-            name: 'Cappuccino',
-            type: 'hot',
-            origin: 'Italy',
-          }]
-        }
-      }]
-    })).not.to.be.rejected;
+    return expect(
+      userRepository.save({
+        username: 'lol',
+        post: [
+          {
+            title: 'Post #1',
+            content: 'lol',
+          },
+          {
+            title: 'Post #2',
+            content: 'test',
+            external: {
+              data: 'something',
+              coffee: [
+                {
+                  name: 'Cappuccino',
+                  type: 'hot',
+                  origin: 'Italy',
+                },
+              ],
+            },
+          },
+        ],
+      }),
+    ).not.to.be.rejected;
   });
-
 });

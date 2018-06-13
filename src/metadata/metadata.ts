@@ -8,5 +8,5 @@ export const COLUMN_METADATA = '@collection/column';
 
 export enum MODES {
   REGULAR = 'regular',
-  PRIMARY_KEY = 'primaryKey'
+  PRIMARY_KEY = 'primaryKey',
 }

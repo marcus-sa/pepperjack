@@ -13,7 +13,6 @@ import { ObjectType, CollectionKey, Repositories } from './types';
 import { EmbeddedMetadata, PepperjackOptions } from './interfaces';
 
 export class Pepperjack {
-
   private readonly logger: Signale;
 
   /**
@@ -30,22 +29,27 @@ export class Pepperjack {
    * Will be used to encrypt and decrypt file content
    * @type {Map<string, CollectionKeys>}
    */
-	public ipfs: IPFS;
+  public ipfs: IPFS;
 
   /**
    * Instantiate a new Pepperjack instance
    * @param {PepperjackOptions} options
    */
-	constructor(options: PepperjackOptions) {
-	  this.options = merge({}, Utils.getDefaultOptions(), options);
-	  this.logger = new Signale({
+  constructor(options: PepperjackOptions) {
+    this.options = merge({}, Utils.getDefaultOptions(), options);
+    this.logger = new Signale({
       types: {
         start: {
           badge: '🌌',
           color: 'green',
-          label: 'pepperjack'
-        }
-      }
+          label: 'pepperjack',
+        },
+        wave: {
+          badge: '👋',
+          color: 'green',
+          label: 'pepperjack',
+        },
+      },
     });
   }
 
@@ -53,8 +57,8 @@ export class Pepperjack {
    * Start the Pepperjack instance
    * @returns {Promise<any>}
    */
-	public start() {
-		return new Promise((resolve) => {
+  public start() {
+    return new Promise(resolve => {
       this.ipfs = new IPFS({
         pass: this.options.pass,
         repo: this.options.repo,
@@ -65,9 +69,9 @@ export class Pepperjack {
       this.ipfs.on('ready', () => {
         this.logger.success('has been intialized');
 
-      	resolve(this.ipfs);
+        resolve(this.ipfs);
       });
-		});
+    });
   }
 
   /**
@@ -75,7 +79,8 @@ export class Pepperjack {
    * @returns {Promise<void>}
    */
   public async close() {
-	  await this.ipfs.stop();
+    await this.ipfs.stop();
+    this.logger.wave('has been stopped');
   }
 
   public createRepository(collection: ObjectType<any>, key: CollectionKey) {
@@ -84,7 +89,16 @@ export class Pepperjack {
     const getters = MetadataStorage.getGettersByCollection(collection);
     const setters = MetadataStorage.getSettersByCollection(collection);
 
-    return new Repository(this.ipfs, this.repositories, collection, key, embeddeds, columns, getters, setters);
+    return new Repository(
+      this.ipfs,
+      this.repositories,
+      collection,
+      key,
+      embeddeds,
+      columns,
+      getters,
+      setters,
+    );
   }
 
   public async register(collections: ObjectType<any>[]) {
@@ -93,11 +107,20 @@ export class Pepperjack {
       scope: 'register',
     });
 
-		const keys = await this.ipfs.key.list();
-    const collectionKeyManager = new CollectionKeyManager(this.ipfs, keys, this.options);
+    const keys = await this.ipfs.key.list();
+    const collectionKeyManager = new CollectionKeyManager(
+      this.ipfs,
+      keys,
+      this.options,
+    );
 
-		const registry = collections.map(async (collection) => {
-		  interactive.await(`[%d/${collections.length}] - Registering collection: ${collection.name}`, collections.indexOf(collection) + 1);
+    const registry = collections.map(async collection => {
+      interactive.await(
+        `[%d/${collections.length}] - Registering collection: ${
+          collection.name
+        }`,
+        collections.indexOf(collection) + 1,
+      );
       const collectionName = Pepperjack.getCollectionName(collection);
       const key = await collectionKeyManager.register(collectionName);
 
@@ -108,10 +131,10 @@ export class Pepperjack {
       this.repositories.set(collectionName, repository);
 
       return repository;
-		});
+    });
 
     return Promise.all(registry).then(() => {
-      interactive.success('Collections have been registered')
+      interactive.success('Collections have been registered');
     });
   }
 
@@ -129,14 +152,13 @@ export class Pepperjack {
    * @param {ObjectType<C>} collection
    * @returns {Repository<C>}
    */
-	public getRepository<C>(collection: ObjectType<C>): Repository<C> {
-		const collectionName = Pepperjack.getCollectionName(collection);
+  public getRepository<C>(collection: ObjectType<C>): Repository<C> {
+    const collectionName = Pepperjack.getCollectionName(collection);
 
-		if (!this.repositories.has(collectionName)) {
+    if (!this.repositories.has(collectionName)) {
       throw new RepositoryUnknownException(collectionName);
     }
 
-		return this.repositories.get(collectionName) as Repository<C>;
+    return this.repositories.get(collectionName) as Repository<C>;
   }
-
 }
