@@ -4,51 +4,34 @@ import { ColumnManager } from './column.manager';
 import { EmbeddedManager } from './embedded.manager';
 
 import { Repositories } from '../types';
-import { ColumnMetadata, EmbeddedMetadata } from '../interfaces';
+import { ColumnMetadata, DecoratorMetadata, EmbeddedMetadata } from '../interfaces';
 
-export abstract class Manager {
+export namespace Manager {
 
-  public static filterColumns<C>(columns: ColumnMetadata[], collection: C) {
+  export function filterMetadata<MD extends DecoratorMetadata[], C>(metadata: MD, collection: C) {
     return Object.keys(collection).filter(
-      (property => columns.find(
-          (column) => property === column.propertyName)
+      (column => metadata.find(
+          (property) => column === property.propertyName)
       )
     );
   }
 
-  public static async assertColumns<C>(columns: ColumnMetadata[], collection: C, storedData) {
-    const assertedColumns = columns.map(async (column) => {
-      /*const t = collection[column.propertyName];
-      console.log(collection, column.propertyName);
-
-      if (Array.isArray(t)) {
-        const columnManagers =  t.map(async (data, i) => {
-          console.log(column.propertyName, data, i);
-          const columnManager = new ColumnManager<C>(column, data[i], storedData);
-          return await columnManager.assert();
-        });
-
-        return await Promise.all(columnManagers);
-      }*/
-
+  export async function assertColumns<C>(columns: ColumnMetadata[], collection: C, storedData) {
+    return Promise.all(columns.map((column) => {
       const columnManager = new ColumnManager<C>(column, collection, storedData);
-      return await columnManager.assert();
-    });
-
-    return await Promise.all(assertedColumns);
+      return columnManager.assert();
+    }));
   }
 
-  public static async assertEmbeddeds<C>(embeddeds: EmbeddedMetadata[], repositories: Repositories, collection: C, storedData) {
-    const assertedEmbeddeds = embeddeds.map(async (embedded) => {
-      const embeddedMananger = new EmbeddedManager<C>(embedded, repositories, collection, storedData);
-      return await embeddedMananger.assert();
-    });
-
-    return await Promise.all(assertedEmbeddeds);
+  export async function assertEmbeddeds<C>(embeddeds: EmbeddedMetadata[], /*repositories: Repositories,*/ collection: C, storedData) {
+    return Promise.all(embeddeds.map((embedded) => {
+      const embeddedMananger = new EmbeddedManager<C>(embedded, /*repositories,*/ collection, storedData);
+      return embeddedMananger.assert();
+    }));
   }
 
-  public static validateColumns<C>(data, collectionColumns: string[]) {
-    const unknownColumns = omit(data, collectionColumns);
+  export function validateColumns<C>(collection, columns: string[]) {
+    const unknownColumns = omit(collection, columns);
 
     if (Object.keys(unknownColumns).length > 0) {
       //throw new ColumnUnknownDataColumns(data, collectionColumns);

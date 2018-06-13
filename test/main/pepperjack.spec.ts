@@ -162,15 +162,32 @@ describe('Pepperjack', () => {
   });
 
   it('should do recursive embedded', async () => {
-    @Collection()
+    @Collection({ embedded: true })
+    class Coffee {
+
+      @Column({ required: true })
+      public name: string;
+
+      @Column({ required: true })
+      public type: string;
+
+      @Column({ required: true })
+      public origin: string;
+
+    }
+
+    @Collection({ embedded: true })
     class Information {
 
       @Column()
       public data?: string;
 
+      @Column(() => Coffee)
+      public coffee?: Coffee[];
+
     }
 
-    @Collection()
+    @Collection({ embedded: true })
     class Post {
 
       @Column({ required: true })
@@ -195,7 +212,7 @@ describe('Pepperjack', () => {
 
     }
 
-    await pepperJack.register([Information, Post, User]);
+    await pepperJack.register([Information, Post, User, Coffee]);
     const userRepository = pepperJack.getRepository<User>(User);
 
     return expect(userRepository.save({
@@ -207,7 +224,12 @@ describe('Pepperjack', () => {
         title: 'Post #2',
         content: 'test',
         external: {
-          data: 'something'
+          data: 'something',
+          coffee: [{
+            name: 'Cappuccino',
+            type: 'hot',
+            origin: 'Italy',
+          }]
         }
       }]
     })).not.to.be.rejected;

@@ -1,6 +1,6 @@
 // Cannot resolve module.exports
-import 'reflect-metadata';
 import IPFS = require('ipfs');
+import { Signale } from 'signale';
 import { merge } from 'lodash';
 
 import { RepositoryUnknownException } from './exceptions';
@@ -10,9 +10,11 @@ import { Repository } from './repository';
 import { Utils } from './utils';
 
 import { ObjectType, CollectionKey, Repositories } from './types';
-import { PepperjackOptions } from './interfaces';
+import { EmbeddedMetadata, PepperjackOptions } from './interfaces';
 
 export class Pepperjack {
+
+  private readonly logger: Signale;
 
   /**
    * Pepperjack options
@@ -36,6 +38,15 @@ export class Pepperjack {
    */
 	constructor(options: PepperjackOptions) {
 	  this.options = merge({}, Utils.getDefaultOptions(), options);
+	  this.logger = new Signale({
+      types: {
+        start: {
+          badge: '🌌',
+          color: 'green',
+          label: 'pepperjack'
+        }
+      }
+    });
   }
 
   /**
@@ -49,7 +60,11 @@ export class Pepperjack {
         repo: this.options.repo,
       });
 
+      this.logger.start('initializing');
+
       this.ipfs.on('ready', () => {
+        this.logger.success('has been intialized');
+
       	resolve(this.ipfs);
       });
 		});
@@ -73,10 +88,16 @@ export class Pepperjack {
   }
 
   public async register(collections: ObjectType<any>[]) {
+    const interactive = new Signale({
+      interactive: true,
+      scope: 'register',
+    });
+
 		const keys = await this.ipfs.key.list();
     const collectionKeyManager = new CollectionKeyManager(this.ipfs, keys, this.options);
 
 		const registry = collections.map(async (collection) => {
+		  interactive.await(`[%d/${collections.length}] - Registering collection: ${collection.name}`, collections.indexOf(collection) + 1);
       const collectionName = Pepperjack.getCollectionName(collection);
       const key = await collectionKeyManager.register(collectionName);
 
@@ -89,7 +110,9 @@ export class Pepperjack {
       return repository;
 		});
 
-    return await Promise.all(registry);
+    return Promise.all(registry).then(() => {
+      interactive.success('Collections have been registered')
+    });
   }
 
   /**

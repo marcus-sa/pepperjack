@@ -83,6 +83,18 @@ describe('@Column', () => {
       const columns = Array.from(MetadataStorage.columns);
       expect(columns[0].mode).to.equal(MODES.REGULAR);
     });
+
+    /*it('test', () => {
+      class Post {
+
+        @Column('string')
+        public authors: string[];
+
+      }
+
+      const columns = Array.from(MetadataStorage.columns);
+      console.log(columns[0]);
+    });*/
   });
 
   describe('-> Embedded metadata', () => {

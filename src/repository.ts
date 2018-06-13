@@ -1,8 +1,10 @@
 import IPFS from 'ipfs';
 
+import { Manager } from './managers';
+import { Utils } from './utils';
+
 import { CollectionKey, ObjectType, Repositories } from './types';
 import { ColumnMetadata, EmbeddedMetadata, GSMetadata } from './interfaces';
-import { Manager } from './managers';
 
 export class Repository<C> {
 
@@ -17,15 +19,13 @@ export class Repository<C> {
     private readonly setters: GSMetadata[],
   ) {}
 
-  //name?: string;
-
-  public async find() {
+  public async find(idOrClause: string | number | { rand: any }) {
 
   }
 
-  public async findById() {
+  /*public async findByPrimaryKey() {
 
-  }
+  }*/
 
   public async get() {
 
@@ -41,25 +41,17 @@ export class Repository<C> {
    * @returns {Promise<any[]>}
    */
   public async save(collections: C | C[]) {
-    // Convert to array if not already
-    collections = !Array.isArray(collections)
-      ? [collections]
-      : collections;
-
-    // @TODO: Clean this garbage pseudo code up
-    const executors = collections.map(async (collection) => {
+    return Promise.all(Utils.toArray(collections).map(async (collection) => {
       // fake
       const storedData = {};
-      const insertColumns = Manager.filterColumns<C>(this.columns, collection);
+      const insertColumns = Manager.filterMetadata<ColumnMetadata[], C>(this.columns, collection);
       Manager.validateColumns(collection, insertColumns);
 
       await Manager.assertColumns(this.columns, collection, storedData);
-      await Manager.assertEmbeddeds(this.embeddeds, this.repositories, collection, storedData);
+      await Manager.assertEmbeddeds(this.embeddeds, /*this.repositories,*/ collection, storedData);
+    }));
 
-      //return await Promise.all([columns, embeddeds]);
-    });
-
-    return await Promise.all(executors);
+    //return await Promise.all(executors);
   }
 
 }

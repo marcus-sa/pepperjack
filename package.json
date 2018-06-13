@@ -42,7 +42,8 @@
     "lodash": "^4.17.10",
     "mocha": "^5.2.0",
     "param-case": "^2.1.1",
-    "reflect-metadata": "^0.1.12"
+    "reflect-metadata": "^0.1.12",
+    "signale": "^1.2.0"
   },
   "nyc": {
     "include": [

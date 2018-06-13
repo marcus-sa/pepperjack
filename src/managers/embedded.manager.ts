@@ -1,9 +1,11 @@
-import { Manager } from './manager';
-import { Pepperjack } from '../pepperjack';
+import { pick, omit } from 'lodash';
 
-import { EmbeddedMetadata } from '../interfaces';
-import { ObjectType, Repositories } from '../types';
 import { MetadataStorage } from '../metadata';
+import { Manager } from './manager';
+
+import { EmbeddedMetadata, ColumnMetadata } from '../interfaces';
+import { ObjectType, Repositories } from '../types';
+import { Utils } from '../utils';
 
 export class EmbeddedManager<Data> {
 
@@ -11,7 +13,7 @@ export class EmbeddedManager<Data> {
 
   constructor(
     private readonly embedded: EmbeddedMetadata,
-    private readonly repositories: Repositories,
+    //private readonly repositories: Repositories,
     private readonly insertData: Data,
     private readonly storedData: Data,
   ) {
@@ -22,17 +24,15 @@ export class EmbeddedManager<Data> {
     return this.insertData[this.embedded.propertyName];
   }
 
-  private async recursiveCheck() { // async
+  /**
+   * Recursively traverse through embeddeds that are related to this collection
+   *
+   * @param {Data} data
+   * @returns {Promise<Promise<[Promise<[void , any]> , any]>>}
+   */
+  private async traverse(data: Data) {
     const embeddeds = MetadataStorage.getEmbeddedsByCollection(this.type);
-    console.log(embeddeds);
-
-    const embeddedManagers = embeddeds.map(embedded => {
-      // async / await
-      console.log('recursiveCheck', this.insertData[embedded.propertyName]);
-      return Manager.assertEmbeddeds(embeddeds, this.repositories, this.insertData[embedded.propertyName], this.storedData);
-    });
-
-    return Promise.all(embeddedManagers); // await
+    return Manager.assertEmbeddeds(embeddeds, data, this.storedData);
   }
 
   private checkArray() {
@@ -44,23 +44,22 @@ export class EmbeddedManager<Data> {
 
   public async assert() {
     this.checkArray();
-    //const collectionName = Pepperjack.getCollectionName(this.embedded.target);
-    //const repository = this.repositories.get(collectionName);
+
     const columns = MetadataStorage.getColumnsByCollection(this.type);
-    const currentColumnData = this.getEmbeddedData();
+    const currentColumnData = Utils.toArray(this.getEmbeddedData());
 
-    if (this.embedded.isArray) {
-      const executors = currentColumnData.map(insertData => {
-        return Manager.assertColumns(columns, insertData, this.storedData);
-      });
+    return Promise.all(currentColumnData.map(async (insertData) => {
+      const insertColumns = Manager.filterMetadata<ColumnMetadata[], Data>(columns, insertData);
+      Manager.validateColumns(insertData, insertColumns);
 
-      return Promise.all(executors);
-    }
+      const pickedData = pick(insertData, insertColumns);
+      await Manager.assertColumns(columns, pickedData, this.storedData);
 
-    await Manager.assertColumns(columns, currentColumnData, this.storedData);
-
-    // Recursive embeddeds
-    return this.recursiveCheck();
+      const leftOverData = omit(insertData, insertColumns);
+      if (Object.keys(leftOverData).length > 0) {
+        await this.traverse(leftOverData);
+      }
+    }));
   }
 
 }

@@ -31,17 +31,21 @@ export function Column(
 		const reflectMetadataType = Reflect.getMetadata('design:type', target, propertyName);
 		if (!type && reflectMetadataType) type = reflectMetadataType;
 
+		// determine if it is an array
+		const isArray = reflectMetadataType === Array || !!options.array;
+
 		if (typeOrOptions instanceof Function) {
 			MetadataStorage.embeddeds.add({
 				target: target.constructor,
-				isArray: reflectMetadataType === Array || !!options.array,
 				prefix: options.prefix,
 				type: typeOrOptions as EmbeddedType,
         propertyName,
+				isArray,
 			});
 		} else {
       // check if there is no type in column options then set type from first function argument, or guessed one
       if (!options.type && type) options.type = type;
+      if (!options.array && isArray) options.array = true;
       //if (!options.validator && validator) options.validator = validator;
       if (!options.type) throw new ColumnTypeUndefinedException(target, propertyName);
 

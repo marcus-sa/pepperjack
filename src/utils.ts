@@ -1,26 +1,48 @@
 import { ObjectType, Metadata } from './types';
-import { ColumnMetadata, PepperjackOptions } from 'src/interfaces';
+import { PepperjackOptions } from './interfaces';
 
-export abstract class Utils {
+export class Utils {
+
+  public static loggers = new Set();
 
   /**
    * Defines metadata on a target
    * @param {ObjectType<T>} target
    * @param {Metadata} metadata
    */
-  static defineMetadata<T>(target: ObjectType<T>, metadata: Metadata) {
+  public static defineMetadata<T>(target: ObjectType<T>, metadata: Metadata) {
     Object.keys(metadata || {}).forEach(key => {
       Reflect.defineMetadata(key, metadata[key], target);
     })
   }
 
-  static getDefaultOptions = (): PepperjackOptions => ({
+  public static getDefaultOptions = (): PepperjackOptions => ({
     pass: '', // should be defined by user
+    dev: process.env.NODE_ENV !== 'production',
     keys: {
       type: 'rsa',
       size: 2048
     }
   });
+
+  public static toArray = (arr) => !Array.isArray(arr) ? [arr] : arr;
+
+  /*export function hasIn(obj: object, keys: string[], filter: (keys: string[], key: string) => boolean) {
+    Object.keys(obj).filter(
+      (key) => filter(keys, key)
+    ).reduce((data, key) => ({
+      ...data,
+      [key]: obj[key],
+    }), {});
+  }
+
+  export function pick(obj, keys) {
+    return Utils.hasIn(obj, keys, (keys, key) => keys.includes(key));
+  }
+
+  export function omit(obj, keys) {
+    return Utils.hasIn(obj, keys, (keys, key) => !keys.includes(key));
+  }*/
 
 }
 
